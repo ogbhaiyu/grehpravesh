@@ -40,10 +40,6 @@ CREATE TABLE IF NOT EXISTS admins (
 
 -- 4. Seed Super Admin
 -- This is the primary admin who can add/remove other admins.
--- IMPORTANT: You must also create this user in Supabase Auth Dashboard:
---   Go to Authentication → Users → Add User
---   Email: boss@grihapravesha.com
---   Password: everywhereigo10@
 INSERT INTO admins (email, is_super_admin)
 VALUES ('boss@grihapravesha.com', true)
 ON CONFLICT (email) DO NOTHING;
