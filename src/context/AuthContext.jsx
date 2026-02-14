@@ -43,39 +43,75 @@ export function AuthProvider({ children }) {
     }
 
     useEffect(() => {
-        // Get initial session
-        supabase.auth?.getSession?.().then?.(({ data: { session } }) => {
-            const currentUser = session?.user || null
-            setUser(currentUser)
-            if (currentUser) {
-                checkAdmin(currentUser.email)
-            }
-            setLoading(false)
-        }).catch?.(() => {
-            setLoading(false)
-        })
+        let mounted = true
 
-        // If supabase.auth doesn't exist (mock mode), just stop loading
-        if (!supabase.auth?.onAuthStateChange) {
-            setLoading(false)
-            return
+        // Safety timeout to prevent infinite loading
+        const timer = setTimeout(() => {
+            if (mounted && loading) {
+                console.log('AuthContext: Safety timeout triggered')
+                setLoading(false)
+            }
+        }, 3000)
+
+        async function initAuth() {
+            if (!supabase.auth) {
+                if (mounted) setLoading(false)
+                return
+            }
+
+            try {
+                // 1. Get initial session
+                const { data: { session } } = await supabase.auth.getSession()
+                if (mounted) {
+                    const currentUser = session?.user || null
+                    setUser(currentUser)
+                    if (currentUser) {
+                        await checkAdmin(currentUser.email)
+                    } else {
+                        setIsAdmin(false)
+                        setIsSuperAdmin(false)
+                    }
+                }
+            } catch (error) {
+                console.error('AuthContext: Init error', error)
+            } finally {
+                if (mounted) setLoading(false)
+            }
+
+            // 2. Listen for changes
+            const { data: { subscription } } = supabase.auth.onAuthStateChange(
+                async (_event, session) => {
+                    if (!mounted) return
+                    const currentUser = session?.user || null
+                    setUser(currentUser)
+
+                    // Only check admin if user changed
+                    if (currentUser) {
+                        // Compare with the current user state from the provider
+                        // This ensures we don't re-check admin status unnecessarily
+                        // if the user object itself changes but the email is the same.
+                        // However, for a full re-evaluation on any user change,
+                        // you might remove the email comparison.
+                        if (currentUser.email !== user?.email) {
+                            await checkAdmin(currentUser.email)
+                        }
+                    } else {
+                        setIsAdmin(false)
+                        setIsSuperAdmin(false)
+                    }
+                    setLoading(false)
+                }
+            )
+
+            return subscription
         }
 
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (_event, session) => {
-                const currentUser = session?.user || null
-                setUser(currentUser)
-                if (currentUser) {
-                    await checkAdmin(currentUser.email)
-                } else {
-                    setIsAdmin(false)
-                    setIsSuperAdmin(false)
-                }
-            }
-        )
+        initAuth()
 
-        return () => subscription?.unsubscribe?.()
+        return () => {
+            mounted = false
+            clearTimeout(timer)
+        }
     }, [])
 
     async function signIn(email, password) {
