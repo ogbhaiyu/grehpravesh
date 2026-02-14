@@ -113,15 +113,9 @@ export default function Footer() {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="mt-14 pt-8 border-t border-dark-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-xs text-gray-muted">
-                        Made with ❤️
-                    </p>
-                    <p className="text-xs text-gray-muted">
+                <div className="mt-14 pt-8 border-t border-dark-border flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <p className="text-xs text-gray-muted text-center">
                         © {new Date().getFullYear()} Grihapravesha. All rights reserved.
-                    </p>
-                    <p className="text-xs text-gray-muted">
-                        in India
                     </p>
                 </div>
             </div>
