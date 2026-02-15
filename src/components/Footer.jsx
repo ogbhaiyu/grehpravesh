@@ -4,14 +4,13 @@ import { Home, Mail, Phone, MapPin, ArrowUpRight, Instagram, Twitter, Linkedin }
 const quickLinks = [
     { name: 'Buy Property', path: '/buy' },
     { name: 'Rent Property', path: '/rent' },
-    { name: 'About Us', path: '#' },
+    { name: 'About Us', path: '/about' },
 ]
 
 const legalLinks = [
     { name: 'Privacy Policy', path: '/privacy' },
     { name: 'Terms of Service', path: '/terms' },
-    { name: 'About Us', path: '#' },
-    { name: 'Contact', path: '#' },
+    { name: 'Contact', path: '/contact' },
 ]
 
 const socials = [
